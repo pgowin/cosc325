@@ -6,7 +6,7 @@
  *
  * Do NOT change function signatures.
  * 
- * 1/15/26
+ * Patrick
  */
 
 /* ===== Part 2 ===== */
@@ -67,4 +67,3 @@ int main() {
 
     return 0;
 }
-//changes made here from patrick
