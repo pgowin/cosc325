@@ -19,6 +19,7 @@ FILE *in_fp; /*, *fopen(); */
 void addChar();
 void getChar();
 void getNonBlank();
+int isValidStringChar(char ch);
 int lex();
 
 /* Character classes */
@@ -176,6 +177,12 @@ void getNonBlank()
     getChar();
 }
 
+int isValidStringChar(char ch)
+{
+  unsigned char uch = (unsigned char)ch;
+  return (uch >= 32 && uch <= 126 && ch != '"');
+}
+
 /* examines current lexeme and returns specific token or IDENT if it's not a keyword */
 int keywordLookup() {
   if (strcmp(lexeme,"PRINT")==0 || strcmp(lexeme,"PR")==0)
@@ -248,10 +255,20 @@ int lex()
   case QUOTE:
     addChar();
     getChar();
-    while (charClass != QUOTE)
+    while (nextChar != '"' && nextChar != '\n' && charClass != EOF)
     {
+      if (!isValidStringChar(nextChar))
+      {
+        printf("Illegal character in string: %c\n", nextChar);
+        exit(1);
+      }
       addChar(); 
       getChar();
+    }
+    if (nextChar != '"')
+    {
+      printf("Unterminated string literal\n");
+      exit(1);
     }
     addChar();
     getChar();
