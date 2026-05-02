@@ -91,7 +91,7 @@ void statement() {
 
         case LET:
             lex();
-            if (nextToken != VAR) {
+            if (nextToken != VAR && nextToken != IDENT) {
                 printf("Expecting IDENT but found: %d\n", nextToken);
                 exit(1);
             }
@@ -156,7 +156,7 @@ void expr_list() {
 }
 
 void var_list() {
-    if (nextToken != VAR) {
+    if (nextToken != VAR && nextToken != IDENT) {
         printf("Expecting VAR but found: %d\n", nextToken);
     }
     else {
@@ -166,7 +166,7 @@ void var_list() {
     }
     while (nextToken == COMMA) {
         lex();
-        if (nextToken != VAR) {
+        if (nextToken != VAR && nextToken != IDENT) {
             printf("Expecting VAR but found: %d\n", nextToken);
         }
         else {
@@ -206,7 +206,7 @@ void term() {
 void factor() {
     // look back at the grammar for all the possibilities for a factor ... you need if else if to handle identifiers, numbers, and parenthesized expressions
     // you should make very sure NOT to have an extra call to lex() here (finally!) because expression() and term() are the ones that need the extra calls to lex() to look for +, -, *, or /
-    if (nextToken == VAR || nextToken == NUMBER) {
+    if (nextToken == VAR || nextToken == IDENT || nextToken == NUMBER) {
         // dont do anything for this assignment
     }
     else if (nextToken == LEFT_PAREN) {
@@ -215,6 +215,10 @@ void factor() {
         if(nextToken != RIGHT_PAREN) {
             printf("Found %d but expecting RIGHT PAREN\n", nextToken);
         }
+    }
+    else {
+        printf("Unexpected token in factor: %d\n", nextToken);
+        exit(1);
     }
 }
 

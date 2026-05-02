@@ -55,7 +55,6 @@ int lex();
 #define LIST 43
 #define CLEAR 44
 #define RUN 45
-#define RETURN 50
 #define CR 99
 
 
