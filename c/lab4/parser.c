@@ -140,12 +140,10 @@ void line() {
             // this must be a new line, allocate space for it
             lines[lineindex] = malloc(1000);
             strcpy(lines[lineindex], rest_of_line);
-            printf("Stored this line: %s at line number %d, which is index %d\n", rest_of_line, lineno, lineindex);
             lineindex++;
         } else {
             // we are overwriting an old line so just copy it over the space that was already allocated at previndex
             strcpy(lines[previndex], rest_of_line);
-            printf("Overwrote old line with this line: %s at line number %d, which is index %d\n", rest_of_line, lineno, previndex);
         }
     } else {
         statement(); // note that statement MUST have an extra call to lex()
@@ -313,11 +311,15 @@ void statement() {
             // setting the read_from_str flag and the current line as the string to be read
             // use one variable both ... a char* to the line to be prcoessed
             // if that line is null, then the lexer should be reading from the file
+            char saved_next_char = nextChar;
+            int saved_char_class = charClass;
+            char *saved_in_str = in_str;
+            int saved_stri = stri;
+
             for (linei=0; linei<lineindex; linei++) {
                 // GOTO and GOSUB will ALTER linei
                 in_str = lines[linei];
                 stri = 0;
-                printf("Executing: %d %s\n",linenos[linei],in_str);
                 getChar();
                 lex();
                 line();
@@ -327,6 +329,10 @@ void statement() {
             // has run and set it to continue reading from the file
             // clearing the flag might necessitate messing with those global
             // variables (nextChar, charClass, etc...)
+            in_str = saved_in_str;
+            stri = saved_stri;
+            nextChar = saved_next_char;
+            charClass = saved_char_class;
             lex();
             break;
 
@@ -414,20 +420,22 @@ void var_list() {
 }
 
 int expression() {
-    if(nextToken == ADD_OP || nextToken == SUB_OP) {
-        lex(); // move past the leading + or - if it was there otherwise, the current nextToken is part of the term so no need to call lex()
+    int sign = 1;
+    if (nextToken == ADD_OP || nextToken == SUB_OP) {
+        if (nextToken == SUB_OP)
+            sign = -1;
+        lex();
     }
-    int result = term();
-    // no need to call lex() here because term() will have already called lex() for us when it was looking for * or /
+
+    int result = sign * term();
     while (nextToken == ADD_OP || nextToken == SUB_OP) {
-        lex(); // move past the + or -
-        if (nextToken == ADD_OP)
+        int op = nextToken;
+        lex();
+        if (op == ADD_OP)
             result += term();
         else
             result -= term();
-        // remember, term() will have already called lex() for us when it was looking for * or / so no need to call it again here
     }
-    // no need for extra call to lex() here because the while loop will have already called lex() for us when it was looking for + or -
     return result;
 }
 
